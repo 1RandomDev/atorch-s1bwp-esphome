@@ -6,7 +6,6 @@ An ESPHome script that frees your S1BWP power meter from the Tuya cloud and enab
 > This project is primarily aimed at the new S1BW(P) versions that are based on the AC6321A microcontroller and T1-2S-NL WiFi module. Other S1 variants with WiFi support may or may not work.
 
 ![homeassistant dashboard](images/ha-dashboard.png)
-
 *The dashboard YAML can be found in [ha-dashboard.yaml](ha-dashboard.yaml).*
 
 ## Install
@@ -47,6 +46,7 @@ esphome run atorch-s1bwp-esphome.yaml
 ## Board Images
 ![board top](images/board-top.jpg)
 ![board bottom](images/board-bottom.jpg)
+![board wifi module](images/board-wifi-module.jpg)
 
 ## Available Tuya data points
 The following Tuya data points were identified using [TuyaMCUAnalyzer](https://github.com/openshwprojects/TuyaMCUAnalyzer).
