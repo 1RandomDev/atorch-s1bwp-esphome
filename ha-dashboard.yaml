@@ -1,0 +1,167 @@
+title: Atorch S1BWP
+path: atorch-s1bwp
+icon: mdi:lightning-bolt-outline
+type: sections
+max_columns: 3
+dense_section_placement: true
+cards: []
+sections:
+  - type: grid
+    cards:
+      - title: Measurements
+        type: entities
+        entities:
+          - entity: switch.atorch_s1bwp_fast_refresh
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_power
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_current
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_voltage
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_frequency
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_power_factor
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_total_energy
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_electricity_cost
+            name:
+              type: entity
+          - entity: button.atorch_s1bwp_reset_statistics
+            name:
+              type: entity
+      - title: System
+        type: entities
+        entities:
+          - entity: select.atorch_s1bwp_current_screen
+            name:
+              type: entity
+          - entity: select.atorch_s1bwp_standby_screen
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_screen_brightness
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_screen_brightness_standby
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_standby_time
+            name:
+              type: entity
+          - entity: button.atorch_s1bwp_toggle_screen_rotation
+            name:
+              type: entity
+          - entity: select.atorch_s1bwp_language
+            name:
+              type: entity
+          - entity: switch.atorch_s1bwp_system_sound
+            name:
+              type: entity
+          - entity: button.atorch_s1bwp_factory_reset
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_cpu_temperature
+            name:
+              type: entity
+  - type: grid
+    cards:
+      - title: Output controls
+        type: entities
+        entities:
+          - entity: switch.atorch_s1bwp_relay
+            name:
+              type: entity
+          - entity: select.atorch_s1bwp_relay_state
+            name:
+              type: entity
+          - entity: select.atorch_s1bwp_power_up_relay_state
+            name:
+              type: entity
+          - entity: select.atorch_s1bwp_switch_mode
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_relay_timer
+            name:
+              type: entity
+      - title: Mode specific
+        type: entities
+        entities:
+          - entity: select.atorch_s1bwp_price_mode
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_electricity_price_only_mode_a
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_smart_poweroff_a_power_below
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_smart_poweroff_a_delay
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_smart_poweroff_b_power_above
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_smart_poweroff_b_delay
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_timing_on_time
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_timing_off_time
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_timing_cycle_on_time
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_timing_cycle_off_time
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_timing_countdown_countdown_on
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_timing_countdown_countdown_off
+            name:
+              type: entity
+  - type: grid
+    cards:
+      - title: Protections
+        type: entities
+        entities:
+          - entity: switch.atorch_s1bwp_poweroff_on_fault
+            name:
+              type: entity
+          - entity: button.atorch_s1bwp_clear_fault
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_poweroff_reason
+            name:
+              type: entity
+          - entity: sensor.atorch_s1bwp_fault_recovery_countdown
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_protections_trigger_delay
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_fault_recovery_time
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_low_voltage_threshold
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_over_voltage_threshold
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_over_current_threshold
+            name:
+              type: entity
+          - entity: number.atorch_s1bwp_over_power_threshold
+            name:
+              type: entity

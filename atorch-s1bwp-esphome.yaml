@@ -1,0 +1,533 @@
+esphome:
+  name: atorch-s1bwp
+  friendly_name: Atorch S1BWP
+  comment: https://github.com/1RandomDev/atorch-s1bwp-esphome
+  project:
+    name: 1RandomDev.atorch-s1bwp-esphome
+    version: 1.0.0
+  platformio_options:
+    custom_versions.beken-bdk: 3.0.78
+
+bk72xx:
+  board: generic-bk7238-tuya
+  family: BK7231N
+  framework: 
+    version: 0.0.0
+    source: https://github.com/libretiny-eu/libretiny#feature/bk7238
+
+logger:
+  baud_rate: 0
+  level: INFO
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+ota:
+  platform: esphome
+  password: !secret ota_password
+
+mqtt:
+  broker: !secret mqtt_host
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  discovery_unique_id_generator: mac
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: !secret timezone
+
+uart:
+    tx_pin: GPIO11
+    rx_pin: GPIO10
+    baud_rate: 115200
+
+tuya:
+  id: tuya_device
+  time_id: sntp_time
+  on_datapoint_update:
+    - sensor_datapoint: 132
+      datapoint_type: enum
+      then:
+        - lambda: |-
+            std::string value;
+            switch (x) {
+              case 0: value = "-"; break;
+              case 1: value = "Over Voltage"; break;
+              case 2: value = "Over Current"; break;
+              case 3: value = "Over Power"; break;
+              case 4: value = "Smart Poweroff A"; break;
+              case 5: value = "Smart Poweroff B"; break;
+              case 7: value = "Timed Off"; break;
+              case 10: value = "Low Voltage"; break;
+              default: value = std::to_string(x); break;
+            }
+            id(turn_off_reason).publish_state(value);
+    - sensor_datapoint: 1
+      datapoint_type: bool
+      then:
+        - lambda: |-
+            id(relay_switch).publish_state(x);
+
+sensor:
+  # Current
+  - platform: tuya
+    name: Current
+    sensor_datapoint: 18
+    device_class: current
+    state_class: measurement
+    unit_of_measurement: A
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+  # Power
+  - platform: tuya
+    name: Power
+    sensor_datapoint: 19
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.01
+  # Voltage
+  - platform: tuya
+    name: Voltage
+    sensor_datapoint: 20
+    device_class: voltage
+    state_class: measurement
+    unit_of_measurement: V
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.01
+  # Electricity cost
+  - platform: tuya
+    name: Electricity cost
+    sensor_datapoint: 102
+    icon: mdi:currency-usd
+    state_class: measurement
+    accuracy_decimals: 4
+    filters:
+      - multiply: 0.0001
+  # Total energy
+  - platform: tuya
+    name: Total energy
+    sensor_datapoint: 123
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kWh
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+  # Frequency
+  - platform: tuya
+    name: Frequency
+    sensor_datapoint: 133
+    device_class: frequency
+    state_class: measurement
+    unit_of_measurement: Hz
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.01
+  # Power factor
+  - platform: tuya
+    name: Power factor
+    sensor_datapoint: 134
+    device_class: power_factor
+    state_class: measurement
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.01
+  # CPU temperature
+  - platform: tuya
+    name: CPU temperature
+    sensor_datapoint: 135
+    unit_of_measurement: °C
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 0
+  # Fault recovery countdown
+  - platform: tuya
+    name: Fault recovery countdown
+    icon: mdi:timer-alert-outline
+    sensor_datapoint: 142
+    unit_of_measurement: s
+    accuracy_decimals: 0
+
+text_sensor:
+  # Poweroff reason
+  - platform: template
+    name: Poweroff reason
+    id: turn_off_reason
+    icon: mdi:alert-octagon-outline
+
+number:
+  # Countdown
+  - platform: tuya
+    name: Relay timer
+    number_datapoint: 9
+    icon: mdi:timer-outline
+    unit_of_measurement: s
+    mode: box
+    step: 1
+    min_value: 0
+    max_value: 360000 # 100h
+  # Electricity price
+  - platform: tuya
+    name: Electricity price (only mode A)
+    number_datapoint: 101
+    icon: mdi:currency-usd
+    mode: box
+    step: 0.01
+    min_value: 0
+    max_value: 999.99
+    multiply: 100
+  # Protections trigger delay
+  - platform: tuya
+    name: Protections trigger delay
+    number_datapoint: 103
+    icon: mdi:clock-alert-outline
+    unit_of_measurement: s
+    mode: box
+    step: 0.1
+    min_value: 0
+    max_value: 2
+    multiply: 10
+  # Over voltage threshold
+  - platform: tuya
+    name: Over voltage threshold
+    number_datapoint: 104
+    icon: mdi:sine-wave
+    unit_of_measurement: V
+    mode: box
+    step: 0.1
+    min_value: 0.1
+    max_value: 275
+    multiply: 10
+  # Over current threshold
+  - platform: tuya
+    name: Over current threshold
+    number_datapoint: 105
+    icon: mdi:current-ac
+    unit_of_measurement: A
+    mode: box
+    step: 0.01
+    min_value: 0.01
+    max_value: 20
+    multiply: 100
+  # Over power threshold
+  - platform: tuya
+    name: Over power threshold
+    number_datapoint: 106
+    icon: mdi:flash
+    unit_of_measurement: W
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 4500
+  # Screen brightness
+  - platform: tuya
+    name: Screen brightness
+    number_datapoint: 108
+    icon: mdi:brightness-6
+    step: 1
+    min_value: 1
+    max_value: 9
+  # Screen brightness standby
+  - platform: tuya
+    name: Screen brightness standby
+    number_datapoint: 109
+    icon: mdi:brightness-6
+    step: 1
+    min_value: 1
+    max_value: 9
+  # Standby time
+  - platform: tuya
+    name: Standby time
+    number_datapoint: 110
+    icon: mdi:timer-lock-outline
+    unit_of_measurement: s
+    mode: box
+    step: 1
+    min_value: 3
+    max_value: 99
+  # Smart Poweroff A - Power below
+  - platform: tuya
+    name: Smart Poweroff A - Power below
+    number_datapoint: 119
+    icon: mdi:timeline-minus-outline
+    unit_of_measurement: W
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 999
+  # Smart Poweroff A - Delay
+  - platform: tuya
+    name: Smart Poweroff A - Delay
+    number_datapoint: 120
+    icon: mdi:timer-minus-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 99
+  # Smart Poweroff B - Power above
+  - platform: tuya
+    name: Smart Poweroff B - Power above
+    number_datapoint: 121
+    icon: mdi:timeline-plus-outline
+    unit_of_measurement: W
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 9999
+  # Smart Poweroff B - Delay
+  - platform: tuya
+    name: Smart Poweroff B - Delay
+    number_datapoint: 122
+    icon: mdi:timer-plus-outline
+    unit_of_measurement: h
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 99
+  # Timing Off - Time
+  - platform: tuya
+    name: Timing Off - Time
+    number_datapoint: 125
+    icon: mdi:timer-stop-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 5999
+    multiply: 60
+  # Timing On - Time
+  - platform: tuya
+    name: Timing On - Time
+    number_datapoint: 126
+    icon: mdi:timer-play-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 5999
+    multiply: 60
+  # Timing Cycle - On time
+  - platform: tuya
+    name: Timing Cycle - On time
+    number_datapoint: 127
+    icon: mdi:timer-sync-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 5999
+    multiply: 60
+  # Timing Cycle - Off time
+  - platform: tuya
+    name: Timing Cycle - Off time
+    number_datapoint: 128
+    icon: mdi:timer-sync-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 5999
+    multiply: 60
+  # Timing Countdown - Countdown On
+  - platform: tuya
+    name: Timing Countdown - Countdown On
+    number_datapoint: 129
+    icon: mdi:timer-refresh-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 5999
+    multiply: 60
+  # Timing Countdown - Countdown Off
+  - platform: tuya
+    name: Timing Countdown - Countdown Off
+    number_datapoint: 130
+    icon: mdi:timer-refresh-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 5999
+    multiply: 60
+  # Fault recovery time
+  - platform: tuya
+    name: Fault recovery time
+    number_datapoint: 137
+    icon: mdi:timer-alert-outline
+    unit_of_measurement: min
+    mode: box
+    step: 1
+    min_value: 1
+    max_value: 99
+  # Low voltage threshold
+  - platform: tuya
+    name: Low voltage threshold
+    number_datapoint: 141
+    icon: mdi:sine-wave
+    unit_of_measurement: V
+    mode: box
+    step: 0.1
+    min_value: 0.1
+    max_value: 275
+    multiply: 10
+
+switch:
+  # System sound
+  - platform: tuya
+    name: System sound
+    switch_datapoint: 111
+    icon: mdi:volume-high
+  # Poweroff on fault
+  - platform: tuya
+    name: Poweroff on fault
+    switch_datapoint: 139
+    icon: mdi:fuse-alert
+  # Fast refresh
+  - platform: tuya
+    name: Fast refresh
+    switch_datapoint: 140
+    icon: mdi:sync
+  # Relay
+  - platform: template
+    name: Relay
+    icon: mdi:electric-switch
+    id: relay_switch
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            select.is:
+              id: relay_state
+              options: "OFF"
+          then:
+            - select.set:
+                id: relay_state
+                option: "ON"
+      - if:
+          condition:
+            select.is:
+              id: relay_state
+              options: "AUTO"
+          then:
+            - button.press: clear_fault_btn
+    turn_off_action:
+      - select.set:
+          id: relay_state
+          option: "OFF"
+
+button:
+  # Reset statistics
+  - platform: template
+    name: Reset statistics
+    icon: mdi:rotate-left
+    on_press:
+      then:
+        - lambda: |-
+            id(tuya_device).force_set_boolean_datapoint_value(113, true);
+  # Factory reset
+  - platform: template
+    name: Factory reset
+    icon: mdi:rotate-left
+    on_press:
+      then:
+        - lambda: |-
+            id(tuya_device).force_set_boolean_datapoint_value(115, true);
+  # Toggle screen rotation
+  - platform: template
+    name: Toggle screen rotation
+    icon: mdi:screen-rotation
+    on_press:
+      then:
+        - lambda: |-
+            id(tuya_device).force_set_boolean_datapoint_value(116, true);
+  # Clear fault
+  - platform: template
+    name: Clear fault
+    id: clear_fault_btn
+    icon: mdi:check-circle-outline
+    on_press:
+      then:
+        - lambda: |-
+            id(tuya_device).force_set_enum_datapoint_value(132, 0);
+
+select:
+  # Language
+  - platform: tuya
+    name: Language
+    enum_datapoint: 107
+    icon: mdi:translate
+    options:
+      0: "Chinese"
+      1: "English"
+  # Switch mode
+  - platform: tuya
+    name: Switch mode
+    enum_datapoint: 112
+    icon: mdi:toggle-switch-variant
+    options:
+      0: "Controllable"
+      1: "Always on"
+  # Standby screen
+  - platform: tuya
+    name: Standby screen
+    enum_datapoint: 117
+    icon: mdi:monitor
+    options:
+      0: "Original"
+      1: "Measurements"
+      2: "Clock"
+      3: "Screen off"
+  # Current screen
+  - platform: tuya
+    name: Current screen
+    enum_datapoint: 118
+    icon: mdi:monitor
+    options:
+      0: "Security Protect"
+      1: "Electricity price"
+      2: "Smart Power Off (A)"
+      3: "Smart Power Off (B)"
+      4: "Timing Cutoff"
+      5: "Timing On"
+      6: "Timing Cycle"
+      7: "Timing Countdown"
+      8: "Voltage/Current graph"
+      9: "History graph"
+  # Relay state
+  - platform: tuya
+    name: Relay state
+    id: relay_state
+    enum_datapoint: 131
+    icon: mdi:electric-switch
+    options:
+      0: "ON"
+      1: "OFF"
+      2: "AUTO"
+  # Price mode
+  - platform: tuya
+    name: Price mode
+    enum_datapoint: 136
+    icon: mdi:cash-multiple
+    options:
+      0: "Price A"
+      1: "Price B"
+      2: "Price C"
+  # Power-up relay state
+  - platform: tuya
+    name: Power-up relay state
+    enum_datapoint: 138
+    icon: mdi:toggle-switch-variant
+    options:
+      0: "ON"
+      1: "OFF"
+      2: "Memory"
+  
