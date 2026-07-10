@@ -4,16 +4,13 @@ esphome:
   comment: https://github.com/1RandomDev/atorch-s1bwp-esphome
   project:
     name: 1RandomDev.atorch-s1bwp-esphome
-    version: 1.0.0
-  platformio_options:
-    custom_versions.beken-bdk: 3.0.78
+    version: 1.0.1
 
 bk72xx:
   board: generic-bk7238-tuya
-  family: BK7231N
   framework: 
-    version: 0.0.0
-    source: https://github.com/libretiny-eu/libretiny#feature/bk7238
+    version: 1.13.0
+    source: https://github.com/libretiny-eu/libretiny
 
 logger:
   baud_rate: 0
@@ -107,9 +104,9 @@ sensor:
     sensor_datapoint: 102
     icon: mdi:currency-usd
     state_class: measurement
-    accuracy_decimals: 4
+    accuracy_decimals: 3
     filters:
-      - multiply: 0.0001
+      - multiply: 0.001
   # Total energy
   - platform: tuya
     name: Total energy
