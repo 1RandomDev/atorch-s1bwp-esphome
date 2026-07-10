@@ -1,20 +1,25 @@
-# Atoch S1BWP ESPHome
+# Atorch S1BWP ESPHome
 
-An ESPHome script that frees your S1BWP power meter from the Tuya cloud and enables fully local control via Home Assistant.
+An ESPHome configuration that frees your S1BWP power meter from the Tuya cloud and enables fully local control via Home Assistant.
 
 > [!NOTE]
-> This project is primarily aimed at the new S1BW(P) versions that are based on the AC6321A microcontroller and T1-2S-NL WiFi module. Other S1 variants with WiFi support may or may not work.
+> This project is primarily aimed at the new S1BW(P) versions that are based on the AC6321A microcontroller and T1-2S-NL WiFi module.
+> Other S1 variants with WiFi support may or may not work.
 
 ![homeassistant dashboard](images/ha-dashboard.png)
 *The dashboard YAML can be found in [ha-dashboard.yaml](ha-dashboard.yaml).*
 
 ## Install
-### 1. Install ESPHome and configure project
-Support for the BK7238 in libretiny is still experimental and currently only works in ESPHome 2026.02.04 or earlier, see PR [#360](https://github.com/libretiny-eu/libretiny/pull/360).
+### Prerequisites
+- Python 3 with `pip3`
+- `git`
+- USB-to-serial adapter (3.3 V logic level)
+- [ltchiptool](https://github.com/libretiny-eu/ltchiptool) or [BK7231GUIFlashTool](https://github.com/openshwprojects/BK7231GUIFlashTool) for firmware backup
 
+### 1. Install ESPHome and configure project
 ```sh
 # Install esphome
-pip3 install esphome==2026.02.04
+pip3 install esphome
 
 # Clone this external component
 git clone https://github.com/1RandomDev/atorch-s1bwp-esphome.git
@@ -22,6 +27,8 @@ cd atorch-s1bwp-esphome
 
 # Copy example config
 cp secrets.yaml.sample secrets.yaml
+
+# Edit secrets.yaml with your WiFi and MQTT credentials
 
 # Validate configuration and compile
 esphome compile atorch-s1bwp-esphome.yaml
@@ -31,12 +38,15 @@ esphome compile atorch-s1bwp-esphome.yaml
 > [!CAUTION]
 > Do not connect the device to the mains while hooked up to a computer, everything on the low voltage side is live!
 
-Connect a USB to serial adapter to RX1/TX1 (the existing connections to the devices PCB need to be broken) and power the device either via 5v or 3.3v. See [Board Images](#board-images) for reference.
+Connect a USB to serial adapter to RX1/TX1 (the existing connections to the devices PCB need to be broken) and power the device either via 5 V or 3.3 V.
+See [Board Images](#board-images) for reference.
 
 ### 3. Backup the original firmware
 This backup is needed if you ever want to install firmware updates for the primary MCU, which are currently only available through the SmartLife app.
 
-The flash contents of the BK7238 can be read using [ltchiptool](https://github.com/libretiny-eu/ltchiptool) or [BK7231GUIFlashTool](https://github.com/openshwprojects/BK7231GUIFlashTool). After the backup process is completed, do NOT reset or power cycle the device. If the device is left in programming mode the next step will be a lot easier.
+The flash contents of the BK7238 can be read using [ltchiptool](https://github.com/libretiny-eu/ltchiptool) or [BK7231GUIFlashTool](https://github.com/openshwprojects/BK7231GUIFlashTool). 
+
+After the backup process is completed, do **NOT** reset or power cycle the device - leaving it in programming mode allows `esphome run` to flash directly.
 
 ### 4. Flash ESPHome via UART
 ```sh
@@ -54,12 +64,12 @@ The following Tuya data points were identified using [TuyaMCUAnalyzer](https://g
 | DP&nbsp;Id | Type | Description | Unit/Range | Prescaler | Writable |
 | ----- | ---- | ----------- | ---------- | --------- | -------- |
 | 1 | Boolean | Actual relay state | | | |
-| 9 | Integer | Countdown until relay toggle (cannot be used in mode AUTO) | 0-360000 s | | X |
+| 9 | Integer | Countdown until relay toggle (not available in AUTO mode) | 0-360000 s | | X |
 | 18 | Integer | Current | A | * 0.001 | |
 | 19 | Integer | Power | W | * 0.01 | |
 | 20 | Integer | Voltage | V | * 0.01 | |
 | 101 | Integer | Electricity price (only price mode A) | 0-999.99 | * 0.01 | X |
-| 102 | Integer | Calculated electricity cost | | * 0.0001 | |
+| 102 | Integer | Calculated electricity cost | | * 0.001 | |
 | 103 | Integer | Protections trigger delay | 0-2 s | * 0.1 | X |
 | 104 | Integer | Over voltage protect threshold | 0.1-275 V | * 0.1 | X |
 | 105 | Integer | Over current protect threshold | 0.01-20 A | * 0.01 | X |
