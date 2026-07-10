@@ -17,11 +17,9 @@ An ESPHome configuration that frees your S1BWP power meter from the Tuya cloud a
 - [ltchiptool](https://github.com/libretiny-eu/ltchiptool) or [BK7231GUIFlashTool](https://github.com/openshwprojects/BK7231GUIFlashTool) for firmware backup
 
 ### 1. Install ESPHome and configure project
-Support for the BK7238 in libretiny is still experimental and currently only works in ESPHome 2026.02.04 or earlier (see PR [#360](https://github.com/libretiny-eu/libretiny/pull/360)). Before installing a newer ESPHome version, check the PR status — once merged, the version pin can be removed.
-
 ```sh
 # Install esphome
-pip3 install esphome==2026.02.04
+pip3 install esphome
 
 # Clone this external component
 git clone https://github.com/1RandomDev/atorch-s1bwp-esphome.git
@@ -30,8 +28,7 @@ cd atorch-s1bwp-esphome
 # Copy example config
 cp secrets.yaml.sample secrets.yaml
 
-# Edit secrets.yaml with your WiFi credentials and Home Assistant API key:
-# wifi_ssid, wifi_password, api_encryption_key, ota_password
+# Edit secrets.yaml with your WiFi and MQTT credentials
 
 # Validate configuration and compile
 esphome compile atorch-s1bwp-esphome.yaml
@@ -49,18 +46,12 @@ This backup is needed if you ever want to install firmware updates for the prima
 
 The flash contents of the BK7238 can be read using [ltchiptool](https://github.com/libretiny-eu/ltchiptool) or [BK7231GUIFlashTool](https://github.com/openshwprojects/BK7231GUIFlashTool). 
 
-After the backup process is completed, do **NOT** reset or power cycle the device — leaving it in programming mode allows `esphome run` to flash directly without re-entering bootloader mode manually.
+After the backup process is completed, do **NOT** reset or power cycle the device - leaving it in programming mode allows `esphome run` to flash directly.
 
 ### 4. Flash ESPHome via UART
 ```sh
 esphome run atorch-s1bwp-esphome.yaml
 ```
-
-### 5. Restoring original firmware
-If you need to revert to the stock Tuya firmware (e.g. to receive MCU firmware updates via the SmartLife app):
-1. Enter programming mode on the BK7238 (hold boot pin during power-up).
-2. Flash the backup image created in step 3.
-3. Power cycle the device — it should reconnect to the SmartLife app automatically.
 
 ## Board Images
 ![board top](images/board-top.jpg)
@@ -78,7 +69,7 @@ The following Tuya data points were identified using [TuyaMCUAnalyzer](https://g
 | 19 | Integer | Power | W | * 0.01 | |
 | 20 | Integer | Voltage | V | * 0.01 | |
 | 101 | Integer | Electricity price (only price mode A) | 0-999.99 | * 0.01 | X |
-| 102 | Integer | Calculated electricity cost (same currency unit as DP 101) | | * 0.0001 | |
+| 102 | Integer | Calculated electricity cost | | * 0.001 | |
 | 103 | Integer | Protections trigger delay | 0-2 s | * 0.1 | X |
 | 104 | Integer | Over voltage protect threshold | 0.1-275 V | * 0.1 | X |
 | 105 | Integer | Over current protect threshold | 0.01-20 A | * 0.01 | X |
