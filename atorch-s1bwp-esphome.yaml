@@ -100,7 +100,7 @@ sensor:
     name: Electricity cost
     sensor_datapoint: 102
     icon: mdi:currency-usd
-    state_class: measurement
+    state_class: total_increasing
     accuracy_decimals: 3
     filters:
       - multiply: 0.001
